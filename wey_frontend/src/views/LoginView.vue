@@ -84,14 +84,16 @@ export default {
                     .then(response => {
                         this.userStore.setToken(response.data)
 
-                        console.log(response.data.access)
-
                         axios.defaults.headers.common["Authorization"] = "Bearer " + response.data.access;
                     })
                     .catch(error => {
                         console.log('error', error)
+
+                        this.errors.push('The email or password is incorrect! Or the user is not activated!')
                     })
-                
+            }
+            
+            if (this.errors.length === 0) {
                 await axios
                     .get('/api/me/')
                     .then(response => {

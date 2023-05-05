@@ -2,14 +2,11 @@
     <div class="max-w-7xl mx-auto grid grid-cols-2 gap-4">
         <div class="main-left">
             <div class="p-12 bg-white border border-gray-200 rounded-lg">
-                <h1 class="mb-6 text-2xl">Edit profile</h1>
+                <h1 class="mb-6 text-2xl">Edit password</h1>
 
                 <p class="mb-6 text-gray-500">
-                    Lorem ipsum dolor sit mate. Lorem ipsum dolor sit mate. Lorem ipsum dolor sit mate.
-                    Lorem ipsum dolor sit mate. Lorem ipsum dolor sit mate. Lorem ipsum dolor sit mate.
+                    Here you can change your password!
                 </p>
-
-                <RouterLink to="/profile/edit/password" class="underline">Edit password</RouterLink>
             </div>
         </div>
 
@@ -17,18 +14,18 @@
             <div class="p-12 bg-white border border-gray-200 rounded-lg">
                 <form class="space-y-6" v-on:submit.prevent="submitForm">
                     <div>
-                        <label>Name</label><br>
-                        <input type="text" v-model="form.name" placeholder="Your full name" class="w-full mt-2 py-4 px-6 border border-gray-200 rounded-lg">
+                        <label>Old password</label><br>
+                        <input type="password" v-model="form.old_password" placeholder="Your old password" class="w-full mt-2 py-4 px-6 border border-gray-200 rounded-lg">
                     </div>
 
                     <div>
-                        <label>E-mail</label><br>
-                        <input type="email" v-model="form.email" placeholder="Your e-mail address" class="w-full mt-2 py-4 px-6 border border-gray-200 rounded-lg">
+                        <label>New password</label><br>
+                        <input type="password" v-model="form.new_password1" placeholder="Your new password" class="w-full mt-2 py-4 px-6 border border-gray-200 rounded-lg">
                     </div>
-
+                    
                     <div>
-                        <label>Avatar</label><br>
-                        <input type="file" ref="file">
+                        <label>Repeat password</label><br>
+                        <input type="password" v-model="form.new_password2" placeholder="Repeat password" class="w-full mt-2 py-4 px-6 border border-gray-200 rounded-lg">
                     </div>
 
                     <template v-if="errors.length > 0">
@@ -66,8 +63,9 @@ export default {
     data() {
         return {
             form: {
-                email: this.userStore.user.email,
-                name: this.userStore.user.name
+                old_password: '',
+                new_password1: '',
+                new_password2: '',
             },
             errors: [],
         }
@@ -77,40 +75,33 @@ export default {
         submitForm() {
             this.errors = []
 
-            if (this.form.email === '') {
-                this.errors.push('Your e-mail is missing')
-            }
-
-            if (this.form.name === '') {
-                this.errors.push('Your name is missing')
+            if (this.form.password1 !== this.form.password2) {
+                this.errors.push('The password does not match')
             }
 
             if (this.errors.length === 0) {
                 let formData = new FormData()
-                formData.append('avatar', this.$refs.file.files[0])
-                formData.append('name', this.form.name)
-                formData.append('email', this.form.email)
+                formData.append('old_password', this.form.old_password)
+                formData.append('new_password1', this.form.new_password1)
+                formData.append('new_password2', this.form.new_password2)
 
                 axios
-                    .post('/api/editprofile/', formData, {
+                    .post('/api/editpassword/', formData, {
                         headers: {
                             "Content-Type": "multipart/form-data",
                         }
                     })
                     .then(response => {
-                        if (response.data.message === 'information updated') {
+                        if (response.data.message === 'success') {
                             this.toastStore.showToast(5000, 'The information was saved', 'bg-emerald-500')
 
-                            this.userStore.setUserInfo({
-                                id: this.userStore.user.id,
-                                name: this.form.name,
-                                email: this.form.email,
-                                avatar: response.data.user.get_avatar
-                            })
-
-                            this.$router.back()
+                            this.$router.push(`/profile/${this.userStore.user.id}`)
                         } else {
-                            this.toastStore.showToast(5000, `${response.data.message}. Please try again`, 'bg-red-300')
+                            const data = JSON.parse(response.data.message)
+
+                            for (const key in data){
+                                this.errors.push(data[key][0].message)
+                            }
                         }
                     })
                     .catch(error => {
