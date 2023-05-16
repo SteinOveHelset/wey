@@ -30,7 +30,7 @@ trends = []
 this_hour = timezone.now().replace(minute=0, second=0, microsecond=0)
 twenty_four_hours = this_hour - timedelta(hours=24)
 
-for post in Post.objects.filter(created_at__gte=twenty_four_hours):
+for post in Post.objects.filter(created_at__gte=twenty_four_hours).filter(is_private=False):
     extract_hashtags(post.body, trends)
 
 for trend in Counter(trends).most_common(10):

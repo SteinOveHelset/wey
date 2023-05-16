@@ -52,24 +52,10 @@
                 class="bg-white border border-gray-200 rounded-lg"
                 v-if="userStore.user.id === user.id"
             >
-                <form v-on:submit.prevent="submitForm" method="post">
-                    <div class="p-4">  
-                        <textarea v-model="body" class="p-4 w-full bg-gray-100 rounded-lg" placeholder="What are you thinking about?"></textarea>
-
-                        <div id="preview" v-if="url">
-                            <img :src="url" class="w-[100px] mt-3 rounded-xl" />
-                        </div>
-                    </div>
-
-                    <div class="p-4 border-t border-gray-100 flex justify-between">
-                        <label class="inline-block py-4 px-6 bg-gray-600 text-white rounded-lg">
-                            <input type="file" ref="file" @change="onFileChange">
-                            Attach image
-                        </label>
-
-                        <button class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg">Post</button>
-                    </div>
-                </form>
+                <FeedForm 
+                    v-bind:user="user" 
+                    v-bind:posts="posts"
+                />
             </div>
 
             <div 
@@ -107,6 +93,7 @@ import axios from 'axios'
 import PeopleYouMayKnow from '../components/PeopleYouMayKnow.vue'
 import Trends from '../components/Trends.vue'
 import FeedItem from '../components/FeedItem.vue'
+import FeedForm from '../components/FeedForm.vue'
 import { useUserStore } from '@/stores/user'
 import { useToastStore } from '@/stores/toast'
 
@@ -126,7 +113,8 @@ export default {
     components: {
         PeopleYouMayKnow,
         Trends,
-        FeedItem
+        FeedItem,
+        FeedForm
     },
 
     data() {
@@ -136,8 +124,6 @@ export default {
                 id: ''
             },
             can_send_friendship_request: null,
-            body: '',
-            url: null,
         }
     },
 
@@ -204,33 +190,6 @@ export default {
                     this.posts = response.data.posts
                     this.user = response.data.user
                     this.can_send_friendship_request = response.data.can_send_friendship_request
-                })
-                .catch(error => {
-                    console.log('error', error)
-                })
-        },
-
-        submitForm() {
-            console.log('submitForm', this.body)
-
-            let formData = new FormData()
-            formData.append('image', this.$refs.file.files[0])
-            formData.append('body', this.body)
-
-            axios
-                .post('/api/posts/create/', formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    }
-                })
-                .then(response => {
-                    console.log('data', response.data)
-
-                    this.posts.unshift(response.data)
-                    this.body = ''
-                    this.$refs.file.value = null
-                    this.url = null
-                    this.user.posts_count += 1
                 })
                 .catch(error => {
                     console.log('error', error)

@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.db import models
 from django.utils.timesince import timesince
 
@@ -32,7 +33,7 @@ class PostAttachment(models.Model):
 
     def get_image(self):
         if self.image:
-            return 'http://127.0.0.1:8000' + self.image.url
+            return settings.WEBSITE_URL + self.image.url
         else:
             return ''
 
@@ -42,6 +43,8 @@ class Post(models.Model):
     body = models.TextField(blank=True, null=True)
 
     attachments = models.ManyToManyField(PostAttachment, blank=True)
+
+    is_private = models.BooleanField(default=False)
 
     likes = models.ManyToManyField(Like, blank=True)
     likes_count = models.IntegerField(default=0)
