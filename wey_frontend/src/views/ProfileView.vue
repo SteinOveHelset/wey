@@ -63,7 +63,7 @@
                 v-for="post in posts"
                 v-bind:key="post.id"
             >
-                <FeedItem v-bind:post="post" />
+                <FeedItem v-bind:post="post" v-on:deletePost="deletePost"/>
             </div>
         </div>
 
@@ -142,9 +142,8 @@ export default {
     },
 
     methods: {
-        onFileChange(e) {
-            const file = e.target.files[0];
-            this.url = URL.createObjectURL(file);
+        deletePost(id) {
+            this.posts = this.posts.filter(post => post.id !== id)
         },
 
         sendDirectMessage() {

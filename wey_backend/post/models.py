@@ -52,6 +52,8 @@ class Post(models.Model):
     comments = models.ManyToManyField(Comment, blank=True)
     comments_count = models.IntegerField(default=0)
 
+    reported_by_users = models.ManyToManyField(User, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, related_name='posts', on_delete=models.CASCADE)
 
